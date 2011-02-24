@@ -1,0 +1,45 @@
+<?php
+
+/************************************************************
+          DRUPAL HOOKS
+************************************************************/
+
+/**
+ * Implementation of hook_init();
+ */
+function domain_nr_init() {
+  if(preg_match('/^node\/([0-9]+)/', $_GET['q'], $matches)) {
+    if($node = node_load($matches[1])) {
+	  //if the -1 index is present, then the node is distributed to
+      //all domains and we don't need to do anything
+        if(!isset($node->domains[-1]) && sizeof($node->domains)) {
+		      $active = domain_get_domain();
+
+		      //make sure that the currently active domain is now one of
+		      //the domains this node is assigned to
+		        if(!in_array($active['domain_id'], array_keys($node->domains)) && $domain_id = array_shift($node->domains)) {
+		          if($domain = domain_load($domain_id)) {
+		            if($active['domain_id']) {
+		              $old_subdomain = explode('.', $active['subdomain']);
+		              $old_subdomain = array_shift($old_subdomain);
+		            }
+								else {
+								  //this should never match
+								  $old_subdomain = '-1';
+								}
+		
+		            $new_subdomain = explode('.', $domain['subdomain']);
+		            $new_subdomain = array_shift($new_subdomain);
+		
+		            $base = str_replace('/'.$old_subdomain, '', url('', array('absolute' => TRUE)));
+					
+		            $path = $base.$new_subdomain.'/'.drupal_get_path_alias($_GET['q']);
+		
+		            header('Location: '.$path);
+		            exit();
+				      }
+          }
+      }
+    }
+  }
+}

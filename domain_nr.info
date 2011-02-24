@@ -1,0 +1,7 @@
+name = Domain Node Redirect
+description = Forces nodes to be viewed/edited through the domain they're assigned to.
+core = 6.x
+version = "6.x-1.0"
+package = Custom
+
+dependencies[] = domain
